@@ -1,0 +1,17 @@
+name: backend-1-1
+services:
+  postgres-db:
+    image: postgres:17-alpine
+    container_name: postgres_17_container
+    restart: always
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: 123456
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
+    driver: local

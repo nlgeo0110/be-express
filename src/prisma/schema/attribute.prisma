@@ -1,0 +1,10 @@
+model Attribute {
+    id                     Int                     @id @default(autoincrement())
+    name                   String                  @db.VarChar(100)
+    createdAt              DateTime                @default(now()) @db.Timestamptz()
+    updatedAt              DateTime                @default(now()) @updatedAt @db.Timestamptz()
+    attributeValues        AttributeValue[]
+    productAttributeValues ProductAttributeValue[]
+
+    @@map("attributes")
+}

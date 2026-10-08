@@ -1,0 +1,16 @@
+model Product {
+    id                     Int                     @id @default(autoincrement())
+    name                   String                  @db.VarChar(200)
+    price                  Int                     @db.Integer
+    salePrice              Int                     @db.Integer
+    status                 Boolean                 @default(false)
+    description            String                  @db.VarChar(1000)
+    shortDescription       String                  @db.VarChar(100)
+    thumbnail              String                  @db.VarChar(2048)
+    createdAt              DateTime                @default(now()) @db.Timestamptz()
+    updatedAt              DateTime                @default(now()) @updatedAt @db.Timestamptz()
+    productImages          ProductImage[]
+    productAttributeValues ProductAttributeValue[]
+
+    @@map("products")
+}
