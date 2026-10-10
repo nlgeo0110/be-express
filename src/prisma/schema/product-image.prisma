@@ -6,5 +6,6 @@ model ProductImage {
     createdAt DateTime @default(now()) @db.Timestamptz()
     updatedAt DateTime @default(now()) @updatedAt @db.Timestamptz()
 
+    @@unique([productId, image])
     @@map("product_images")
 }
