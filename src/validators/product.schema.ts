@@ -34,7 +34,7 @@ export const createProductBodySchema = z.object({
   description: z.string().trim().min(1, 'description is required'),
   shortDescription: z.string().trim().min(1, 'shortDescription is required'),
   thumbnail: z.url('thumbnail is invalid').trim(),
-  images: z.array(z.string('images is invalid')).min(1, 'images is required'),
+  images: z.array(z.string('images is invalid')),
   attributes: z
     .array(productAttributeSchema)
     .min(1, 'attributes is required')

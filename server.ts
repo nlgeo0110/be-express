@@ -1,12 +1,12 @@
-import 'dotenv/config';
 import httpStatus from 'http-status';
 import express, { ErrorRequestHandler } from 'express';
 
+import { env } from '@/config/env';
 import productRoutes from '@/routes/product.routes';
 import { AppError, NotFoundError } from '@/utils/errors';
 
 const app = express();
-const PORT = process.env.PORT;
+const PORT = env.PORT;
 
 app.use(express.json()); // for parsing application/json
 app.use(express.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded

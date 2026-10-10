@@ -122,14 +122,13 @@ export default {
     { attributes, images, ...data }: UpdateProductBody
   ) {
     const attributeInputs = attributes && toAttributeInputs(attributes);
-    const imagesInputs = images && toImageInputs(images);
     if (attributeInputs) {
       await assertValidAttributes(attributeInputs);
     }
 
     const product = await productRepository.update(id, {
       ...data,
-      images: imagesInputs,
+      images,
       attributes: attributeInputs,
     });
     return normalizeProduct(product);

@@ -1,3 +1,4 @@
+import { isProd } from '@/config/env';
 import { prisma } from '@/database/postgres.database';
 import { Attribute, Prisma } from '@/generated/prisma/client';
 
@@ -38,7 +39,7 @@ const seedAttributeValue = async (attrs: Attribute[]) => {
 };
 
 const main = async () => {
-  if (process.env.NODE_ENV === 'production') {
+  if (isProd) {
     throw new Error('Refusing to seed production database');
   }
 
