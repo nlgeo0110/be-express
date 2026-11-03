@@ -24,7 +24,6 @@ export const validateQuery =
 
 export const validateBody =
   (schema: ZodType) => (req: Request, res: Response, next: NextFunction) => {
-    console.log('result', req.body);
     const result = schema.safeParse(req.body);
     if (!result.success) {
       respondBadRequest(
@@ -34,7 +33,7 @@ export const validateBody =
       );
       return;
     }
-    res.locals.body = result.data;
+    req.body = result.data;
     next();
   };
 
