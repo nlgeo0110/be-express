@@ -3,6 +3,7 @@ import express, { ErrorRequestHandler } from 'express';
 
 import { env } from '@/config/env';
 import productRoutes from '@/routes/product.routes';
+import authRoutes from '@/routes/auth.routes';
 import { AppError, NotFoundError } from '@/utils/errors';
 
 const app = express();
@@ -12,6 +13,7 @@ app.use(express.json()); // for parsing application/json
 app.use(express.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
 
 app.use('/api/products', productRoutes);
+app.use('/api/auth', authRoutes);
 
 app.use((req, _res, next) => {
   next(new NotFoundError(`Route ${req.method} ${req.originalUrl} not found`));
