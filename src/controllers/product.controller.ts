@@ -34,8 +34,8 @@ export default {
     });
   }),
 
-  createProduct: asyncHandler(async (_req: Request, res: Response) => {
-    const body = res.locals.body as CreateProductBody;
+  createProduct: asyncHandler(async (req: Request, res: Response) => {
+    const body = req.body as CreateProductBody;
     const product = await productService.createProduct(body);
 
     return res.status(httpStatus.CREATED).send({
@@ -46,8 +46,8 @@ export default {
     });
   }),
 
-  updateProduct: asyncHandler(async (_req: Request, res: Response) => {
-    const body = res.locals.body as UpdateProductBody;
+  updateProduct: asyncHandler(async (req: Request, res: Response) => {
+    const body = req.body as UpdateProductBody;
     const { id } = res.locals.params as ProductIdParam;
     const product = await productService.updateProduct(id, body);
 
