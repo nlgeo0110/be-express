@@ -1,0 +1,17 @@
+enum RoleName {
+    ADMIN
+    MANAGER
+    STAFF
+}
+
+model Role {
+    id              Int              @id @default(autoincrement())
+    name            RoleName
+    rolePermissions RolePermission[]
+    userRoles       UserRole[]
+    createdAt       DateTime         @default(now()) @db.Timestamptz()
+    updatedAt       DateTime         @default(now()) @updatedAt @db.Timestamptz()
+
+    @@unique([name])
+    @@map("roles")
+}

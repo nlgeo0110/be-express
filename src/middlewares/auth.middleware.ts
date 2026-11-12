@@ -1,7 +1,8 @@
 import authService from '@/services/auth.service';
 import userService from '@/services/user.service';
 import { UnauthorizedError } from '@/utils/errors';
-import { getTokenTTL, verifyAccessToken } from '@/utils/jwt';
+import { verifyAccessToken } from '@/utils/jwt';
+import { setAuthContext } from '@/utils/request-context';
 import { Request, Response, NextFunction } from 'express';
 
 export const authMiddleware = async (
@@ -22,9 +23,8 @@ export const authMiddleware = async (
   const user = await userService.getUserById(decodedToken?.user_id);
   if (!user) throw new UnauthorizedError();
 
-  // 4. Gắn user, jti vào req
-  req.user = user;
-  req.jti = decodedToken.jti;
+  // 4. Gắn user, jti vào context
+  setAuthContext(user, decodedToken.jti);
 
   next();
 };

@@ -1,15 +1,19 @@
+import { toUserResponse } from '@/mappers/user.mapper';
 import authService from '@/services/auth.service';
-import { asyncHandler } from '@/utils/async-handler';
-import { UnauthorizedError } from '@/utils/errors';
+import {
+  requireAuthContext,
+  requireCurrentUser,
+} from '@/utils/request-context';
 import {
   LoginBody,
   RefreshTokenBody,
   RegisterBody,
 } from '@/validators/auth.schema';
+import { RequestHandler } from 'express';
 import httpStatus from 'http-status';
 
 export default {
-  login: asyncHandler(async (req, res) => {
+  async login(req, res) {
     const { username, password } = req.body as LoginBody;
     const data = await authService.login({ username, password });
 
@@ -19,9 +23,9 @@ export default {
       message: 'Logged in successfully',
       data,
     });
-  }),
+  },
 
-  register: asyncHandler(async (req, res) => {
+  async register(req, res) {
     const { username, password } = req.body as RegisterBody;
     const data = await authService.register({ username, password });
 
@@ -31,21 +35,20 @@ export default {
       message: 'Registered successfully',
       data,
     });
-  }),
+  },
 
-  logout: asyncHandler(async (req, res) => {
-    const { user, jti } = req;
-    if (!jti || !user?.id) throw new UnauthorizedError();
-    await authService.logout({ userId: user?.id, jti });
+  async logout(_req, res) {
+    const { user, jti } = requireAuthContext();
+    await authService.logout({ userId: user.id, jti });
 
     return res.status(httpStatus.OK).json({
       code: httpStatus.OK,
       success: true,
       message: 'Logged out successfully',
     });
-  }),
+  },
 
-  refreshToken: asyncHandler(async (req, res) => {
+  async refreshToken(req, res) {
     const { refresh_token } = req.body as RefreshTokenBody;
     const data = await authService.refreshToken({ refresh_token });
 
@@ -55,20 +58,21 @@ export default {
       message: 'Token refreshed successfully',
       data,
     });
-  }),
+  },
 
-  getMe: asyncHandler(async (req, res) => {
+  async getMe(_req, res) {
+    const currentUser = requireCurrentUser();
+
     return res.status(httpStatus.OK).json({
       code: httpStatus.OK,
       success: true,
       message: 'Get current user successfully',
-      data: req.user,
+      data: toUserResponse(currentUser),
     });
-  }),
+  },
 
-  revokeOtherTokens: asyncHandler(async (req, res) => {
-    const { user, jti } = req;
-    if (!jti || !user?.id) throw new UnauthorizedError();
+  async revokeOtherTokens(_req, res) {
+    const { user, jti } = requireAuthContext();
 
     await authService.revokeOtherTokens(user.id, jti);
 
@@ -77,5 +81,5 @@ export default {
       success: true,
       message: 'Other tokens revoked successfully',
     });
-  }),
-};
+  },
+} satisfies Record<string, RequestHandler>;
