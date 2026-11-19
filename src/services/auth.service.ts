@@ -1,3 +1,4 @@
+import { toAuthUser, toUserResponse } from '@/mappers/user.mapper';
 import tokenRepository from '@/repositories/token.repository';
 import userRepository from '@/repositories/user.repository';
 import { BadRequestError, UnauthorizedError } from '@/utils/errors';
@@ -35,14 +36,14 @@ export default {
     if (!userWithPassword)
       throw new BadRequestError('Invalid username or password');
 
-    const { password: hashedPassword, id: user_id, ...user } = userWithPassword;
-    const isPasswordMatch = await comparePassword(password, hashedPassword);
+    const user = toAuthUser(userWithPassword);
+    const isPasswordMatch = await comparePassword(password, user.password);
     if (!isPasswordMatch)
       throw new BadRequestError('Invalid username or password');
 
-    const { access_token, refresh_token } = await this.generateToken(user_id);
+    const { access_token, refresh_token } = await this.generateToken(user.id);
 
-    return { user, access_token, refresh_token };
+    return { user: toUserResponse(user), access_token, refresh_token };
   },
 
   async register({
@@ -63,7 +64,11 @@ export default {
     const { id: user_id } = user;
     const { access_token, refresh_token } = await this.generateToken(user_id);
 
-    return { user, access_token, refresh_token };
+    return {
+      user: toUserResponse(toAuthUser(user)),
+      access_token,
+      refresh_token,
+    };
   },
 
   async refreshToken({

@@ -1,16 +1,15 @@
 import productService from '@/services/product.service';
-import { asyncHandler } from '@/utils/async-handler';
 import {
   CreateProductBody,
   GetProductsQuery,
   ProductIdParam,
   UpdateProductBody,
 } from '@/validators/product.schema';
-import { Request, Response } from 'express';
+import { Request, RequestHandler, Response } from 'express';
 import httpStatus from 'http-status';
 
 export default {
-  getProducts: asyncHandler(async (_req: Request, res: Response) => {
+  async getProducts(_req: Request, res: Response) {
     const query = res.locals.query as GetProductsQuery;
     const products = await productService.getProducts(query);
 
@@ -20,9 +19,9 @@ export default {
       message: 'Get product list successfully',
       data: products,
     });
-  }),
+  },
 
-  getProductById: asyncHandler(async (_req: Request, res: Response) => {
+  async getProductById(_req: Request, res: Response) {
     const { id } = res.locals.params as ProductIdParam;
     const product = await productService.getProductById(id);
 
@@ -32,9 +31,9 @@ export default {
       message: 'Get product successfully',
       data: product,
     });
-  }),
+  },
 
-  createProduct: asyncHandler(async (req: Request, res: Response) => {
+  async createProduct(req: Request, res: Response) {
     const body = req.body as CreateProductBody;
     const product = await productService.createProduct(body);
 
@@ -44,9 +43,9 @@ export default {
       message: 'Product created successfully',
       data: product,
     });
-  }),
+  },
 
-  updateProduct: asyncHandler(async (req: Request, res: Response) => {
+  async updateProduct(req: Request, res: Response) {
     const body = req.body as UpdateProductBody;
     const { id } = res.locals.params as ProductIdParam;
     const product = await productService.updateProduct(id, body);
@@ -57,5 +56,5 @@ export default {
       message: 'Product updated successfully',
       data: product,
     });
-  }),
-};
+  },
+} satisfies Record<string, RequestHandler>;

@@ -1,9 +1,9 @@
 import { isProd } from '@/config/env';
 import { prisma } from '@/database/postgres.database';
-import { Attribute, Prisma } from '@/generated/prisma/client';
+import { Attribute, Prisma, RoleName } from '@/generated/prisma/client';
 
 const reset = async () => {
-  await prisma.$executeRaw`TRUNCATE TABLE attribute_values, attributes RESTART IDENTITY CASCADE`;
+  await prisma.$executeRaw`TRUNCATE TABLE roles, attribute_values, attributes RESTART IDENTITY CASCADE`;
 };
 
 const ATTRIBUTES: Record<string, string[]> = {
@@ -38,6 +38,12 @@ const seedAttributeValue = async (attrs: Attribute[]) => {
   });
 };
 
+const seedRole = async () => {
+  await prisma.role.createMany({
+    data: Object.values(RoleName).map((name) => ({ name })),
+  });
+};
+
 const main = async () => {
   if (isProd) {
     throw new Error('Refusing to seed production database');
@@ -46,6 +52,7 @@ const main = async () => {
   await reset();
   const attrs = await seedAttribute();
   await seedAttributeValue(attrs);
+  await seedRole();
 };
 
 main()
