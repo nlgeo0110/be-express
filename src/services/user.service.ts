@@ -24,8 +24,8 @@ export default {
     return users.map((user) => toAuthUser(user));
   },
 
-  async getUserByUsername(username: string) {
-    const user = await userRepository.findByUsername(username);
+  async getUserByEmail(email: string) {
+    const user = await userRepository.findByEmail(email);
     return user && toAuthUser(user);
   },
 
@@ -34,15 +34,15 @@ export default {
     return user && toAuthUser(user);
   },
 
-  async createUser({ username, password, name, roles }: CreateUserBody) {
-    const existingUser = await userRepository.findByUsername(username);
-    if (existingUser) throw new BadRequestError('Username already exists');
+  async createUser({ email, password, name, roles }: CreateUserBody) {
+    const existingUser = await userRepository.findByEmail(email);
+    if (existingUser) throw new BadRequestError('Email already exists');
 
     const roleIds = await resolveRoleIds(roles);
     const hashedPassword = await hashPassword(password);
 
     const user = await userRepository.create({
-      username,
+      email,
       password: hashedPassword,
       name,
       roleIds,

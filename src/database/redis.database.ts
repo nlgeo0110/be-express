@@ -3,4 +3,8 @@ import { env } from '@/config/env';
 
 const redisClient = new Redis(env.REDIS_URL);
 
-export { redisClient };
+const bullConnection = new Redis(env.REDIS_URL, {
+  maxRetriesPerRequest: null,
+});
+
+export { redisClient, bullConnection };
