@@ -37,18 +37,18 @@ export const toAuthUser = <T extends WithRoles>({
 
 export type UserResponse = Pick<
   AuthUser,
-  'id' | 'username' | 'permissions' | 'createdAt' | 'updatedAt'
+  'id' | 'email' | 'permissions' | 'createdAt' | 'updatedAt'
 >;
 
 export const toUserResponse = ({
   id,
-  username,
+  email,
   permissions,
   createdAt,
   updatedAt,
 }: UserResponse): UserResponse => ({
   id,
-  username,
+  email,
   permissions,
   createdAt,
   updatedAt,
@@ -56,19 +56,19 @@ export const toUserResponse = ({
 
 export type AdminUserResponse = Pick<
   AuthUser,
-  'id' | 'username' | 'name' | 'roles' | 'createdAt' | 'updatedAt'
+  'id' | 'email' | 'name' | 'roles' | 'createdAt' | 'updatedAt'
 >;
 
 export const toAdminUserResponse = ({
   id,
-  username,
+  email,
   name,
   roles,
   createdAt,
   updatedAt,
 }: AdminUserResponse): AdminUserResponse => ({
   id,
-  username,
+  email,
   name,
   roles,
   createdAt,

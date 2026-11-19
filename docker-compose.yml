@@ -26,6 +26,14 @@ services:
       timeout: 3s
       retries: 5
 
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: mailpit-container
+    restart: always
+    ports:
+      - '1025:1025' # SMTP
+      - '8025:8025' # Web UI: http://localhost:8025
+
 volumes:
   pgdata:
     driver: local

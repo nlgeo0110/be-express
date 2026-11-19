@@ -17,17 +17,17 @@ export const authUserInclude = {
 } satisfies Prisma.UserInclude;
 
 export default {
-  findByUsername(username: string) {
+  findByEmail(email: string) {
     return prisma.user.findUnique({
-      where: { username },
+      where: { email },
       omit: { password: true },
       include: authUserInclude,
     });
   },
 
-  findByUsernameWithPassword(username: string) {
+  findByEmailWithPassword(email: string) {
     return prisma.user.findUnique({
-      where: { username },
+      where: { email },
       include: authUserInclude,
     });
   },
@@ -59,7 +59,7 @@ export default {
     roleIds,
     ...data
   }: {
-    username: string;
+    email: string;
     password: string;
     name?: string;
     roleIds?: number[];
@@ -104,5 +104,12 @@ export default {
         omit: { password: true },
       }),
     ]);
+  },
+
+  updatePassword(id: number, newPassword: string) {
+    return prisma.user.update({
+      where: { id },
+      data: { password: newPassword },
+    });
   },
 };
