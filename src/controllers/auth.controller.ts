@@ -14,8 +14,8 @@ import httpStatus from 'http-status';
 
 export default {
   async login(req, res) {
-    const { username, password } = req.body as LoginBody;
-    const data = await authService.login({ username, password });
+    const { email, password } = req.body as LoginBody;
+    const data = await authService.login({ email, password });
 
     return res.status(httpStatus.OK).json({
       code: httpStatus.OK,
@@ -26,8 +26,8 @@ export default {
   },
 
   async register(req, res) {
-    const { username, password } = req.body as RegisterBody;
-    const data = await authService.register({ username, password });
+    const { email, password } = req.body as RegisterBody;
+    const data = await authService.register({ email, password });
 
     return res.status(httpStatus.CREATED).json({
       code: httpStatus.CREATED,
@@ -80,6 +80,28 @@ export default {
       code: httpStatus.OK,
       success: true,
       message: 'Other tokens revoked successfully',
+    });
+  },
+
+  async forgotPassword(req, res) {
+    const { email } = req.body;
+    await authService.forgotPassword(email);
+
+    return res.status(httpStatus.OK).json({
+      code: httpStatus.OK,
+      success: true,
+      message: 'Nếu email tồn tại, OTP sẽ được gửi tới email của bạn',
+    });
+  },
+
+  async resetPassword(req, res) {
+    const { otp, newPassword } = req.body;
+    await authService.resetPassword(otp, newPassword);
+
+    return res.status(httpStatus.OK).json({
+      code: httpStatus.OK,
+      success: true,
+      message: 'Đặt lại mật khẩu thành công',
     });
   },
 } satisfies Record<string, RequestHandler>;

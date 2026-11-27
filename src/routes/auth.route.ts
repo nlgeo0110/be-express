@@ -3,9 +3,11 @@ import authController from '@/controllers/auth.controller';
 import { authMiddleware } from '@/middlewares/auth.middleware';
 import { validateBody } from '@/middlewares/validate.middleware';
 import {
+  forgotPasswordBodySchema,
   loginBodySchema,
   refreshTokenBodySchema,
   registerBodySchema,
+  resetPasswordBodySchema,
 } from '@/validators/auth.schema';
 
 const router = Router();
@@ -28,5 +30,15 @@ router.post(
   authController.revokeOtherTokens
 );
 router.get('/me', authMiddleware, authController.getMe);
+router.post(
+  '/forgot-password',
+  validateBody(forgotPasswordBodySchema),
+  authController.forgotPassword
+);
+router.post(
+  '/reset-password',
+  validateBody(resetPasswordBodySchema),
+  authController.resetPassword
+);
 
 export default router;

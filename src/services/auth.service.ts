@@ -1,4 +1,8 @@
+import { env } from '@/config/env';
+import { RedisKeys } from '@/constants/redis-keys';
+import { redisClient } from '@/database/redis.database';
 import { toAuthUser, toUserResponse } from '@/mappers/user.mapper';
+import { emailProducer } from '@/queues/email/email.producer';
 import tokenRepository from '@/repositories/token.repository';
 import userRepository from '@/repositories/user.repository';
 import { BadRequestError, UnauthorizedError } from '@/utils/errors';
@@ -10,6 +14,7 @@ import {
   signRefreshToken,
   verifyRefreshToken,
 } from '@/utils/jwt';
+import { generateOTP } from '@/utils/otp';
 
 export default {
   async generateToken(user_id: number) {
@@ -30,35 +35,29 @@ export default {
     return { access_token, refresh_token };
   },
 
-  async login({ username, password }: { username: string; password: string }) {
+  async login({ email, password }: { email: string; password: string }) {
     const userWithPassword =
-      await userRepository.findByUsernameWithPassword(username);
+      await userRepository.findByEmailWithPassword(email);
     if (!userWithPassword)
-      throw new BadRequestError('Invalid username or password');
+      throw new BadRequestError('Invalid email or password');
 
     const user = toAuthUser(userWithPassword);
     const isPasswordMatch = await comparePassword(password, user.password);
     if (!isPasswordMatch)
-      throw new BadRequestError('Invalid username or password');
+      throw new BadRequestError('Invalid email or password');
 
     const { access_token, refresh_token } = await this.generateToken(user.id);
 
     return { user: toUserResponse(user), access_token, refresh_token };
   },
 
-  async register({
-    username,
-    password,
-  }: {
-    username: string;
-    password: string;
-  }) {
-    const existingUser = await userRepository.findByUsername(username);
-    if (existingUser) throw new BadRequestError('Username already exists');
+  async register({ email, password }: { email: string; password: string }) {
+    const existingUser = await userRepository.findByEmail(email);
+    if (existingUser) throw new BadRequestError('Email already exists');
     const hashedPassword = await hashPassword(password);
 
     const user = await userRepository.create({
-      username,
+      email,
       password: hashedPassword,
     });
     const { id: user_id } = user;
@@ -128,5 +127,59 @@ export default {
 
   isAccessTokenRevoked(jti: string) {
     return tokenRepository.isAccessTokenRevoked(jti);
+  },
+
+  async removeOldResetPasswordOtp(userId: number) {
+    if (!userId) return;
+
+    const oldOtp = await redisClient.getdel(
+      RedisKeys.resetPasswordOtpUser(String(userId))
+    );
+    if (oldOtp) redisClient.del(RedisKeys.resetPasswordOtp(oldOtp));
+  },
+
+  async forgotPassword(email: string) {
+    const user = await userRepository.findByEmail(email);
+    if (!user) return;
+
+    const otp = generateOTP();
+    const userId = user.id;
+
+    await this.removeOldResetPasswordOtp(userId);
+
+    await redisClient.setex(
+      RedisKeys.resetPasswordOtp(otp),
+      env.OTP_TTL,
+      userId
+    );
+    await redisClient.setex(
+      RedisKeys.resetPasswordOtpUser(String(userId)),
+      env.OTP_TTL,
+      otp
+    );
+    await emailProducer.sendResetPasswordOtp({
+      to: user.email,
+      otp,
+    });
+
+    return { email };
+  },
+
+  async resetPassword(otp: string, newPassword: string) {
+    const userId =
+      (await redisClient.getdel(RedisKeys.resetPasswordOtp(otp))) || '';
+    if (!userId) throw new BadRequestError('OTP không hợp lệ hoặc đã hết hạn');
+    const storedOtp = await redisClient.getdel(
+      RedisKeys.resetPasswordOtpUser(userId)
+    );
+    if (!storedOtp)
+      throw new BadRequestError('OTP không hợp lệ hoặc đã hết hạn');
+
+    const hashedPassword = await hashPassword(newPassword);
+    const user = await userRepository.updatePassword(+userId, hashedPassword);
+    await emailProducer.sendResetPasswordSuccess({
+      to: user.email,
+      changedAt: new Date().toISOString(),
+    });
   },
 };
